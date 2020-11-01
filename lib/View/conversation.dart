@@ -1,3 +1,4 @@
+import 'package:chat/View/ProfileScreen.dart';
 import 'package:chat/services/Cons.dart';
 import 'package:chat/services/database.dart';
 import 'package:flutter/cupertino.dart';
@@ -52,20 +53,27 @@ class _ConversationState extends State<Conversation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-          Image.asset(
-          'asset/images/logo.png',
-          fit: BoxFit.contain,
-          height: 60,
+      appBar: AppBar(title: GestureDetector(
+        onTap: (){
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context)=>Profile(),
+          ));
+        },
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+            Image.asset(
+            'asset/images/logo.png',
+            fit: BoxFit.contain,
+            height: 60,
     ),
     Container(
     padding: const EdgeInsets.all(8.0), child: Text(widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",)))
     ],
 
     ),
+        ),
       ),),
       body: Container(
         child: Stack(

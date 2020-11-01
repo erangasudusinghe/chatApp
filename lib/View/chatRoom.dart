@@ -50,7 +50,18 @@ class _ChatRoomState extends State<ChatRoom> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Stack( // <-- STACK AS THE SCAFFOLD PARENT
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("asset/images/chatboximage.jpg"), // <-- BACKGROUND IMAGE
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+    Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Image.asset("asset/images/logo.png", height: 50,),
         backgroundColor: Colors.green,
@@ -71,6 +82,7 @@ class _ChatRoomState extends State<ChatRoom> {
       body: ChatRoomList(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.search),
+        backgroundColor: Colors.green[800],
         onPressed: ()
         {
             Navigator.push(context, MaterialPageRoute(
@@ -78,7 +90,7 @@ class _ChatRoomState extends State<ChatRoom> {
             ));
         },
       ),
-    );
+    )]);
   }
 }
 class ChatRoomTile extends StatelessWidget {
@@ -95,21 +107,37 @@ class ChatRoomTile extends StatelessWidget {
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 15 ,horizontal:4 ),
-        child: Row(
-          children: [
-            Container(
-              height: 50,
-              width: 50,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.limeAccent,
-                borderRadius: BorderRadius.circular(40),
+        child: Container(
+          width: 150,
+          height: 50,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+            color: Colors.white
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 50,
+                width: 50,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.limeAccent,
+                  borderRadius: BorderRadius.circular(40),
+                  boxShadow:[
+                            BoxShadow(
+                                    color: Colors.grey.withOpacity(0.8),
+                                    spreadRadius: 3,
+                                    blurRadius: 5,
+                                    offset: Offset(0, 3),
+                                   ),
+                            ],
+                ),
+                child: Text("${name.substring(0,1).toUpperCase()}", style: blackTextstyle()),
               ),
-              child: Text("${name.substring(0,1).toUpperCase()}", style: simpleTextstyle()),
-            ),
-            SizedBox(width: 8,),
-            Text(name,style: simpleTextstyle()),
-          ],
+              SizedBox(width: 8,),
+              Text(name,style: blackTextstyle()),
+            ],
+          ),
         ),
       ),
     );
