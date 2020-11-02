@@ -1,4 +1,5 @@
 import 'package:chat/View/ProfileScreen.dart';
+import 'package:chat/Widgets/Widget.dart';
 import 'package:chat/services/Cons.dart';
 import 'package:chat/services/database.dart';
 import 'package:flutter/cupertino.dart';
@@ -59,47 +60,41 @@ class _ConversationState extends State<Conversation> {
             builder: (context)=>Profile(),
           ));
         },
-        child: Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-            Image.asset(
-            'asset/images/logo.png',
-            fit: BoxFit.contain,
-            height: 60,
+        child: Container(          
+        padding: const EdgeInsets.all(2.0), child: Text(widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",)))
+      ),
+    backgroundColor: Colors.green[800],
     ),
-    Container(
-    padding: const EdgeInsets.all(8.0), child: Text(widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",)))
-    ],
-
-    ),
-        ),
-      ),),
       body: Container(
+        color: Colors.white,
         child: Stack(
           children:[
             MessageList(),
             Container(
             alignment: Alignment.bottomCenter,
             child: Container(
-                color: Colors.white30,
+                color: Colors.white,
                 child: Row(
                   children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: TextField(style: TextStyle(color: Colors.white),
-                          controller: messagetextSendingController,
-                          decoration: InputDecoration(
-                            hintText: "Type Message",
-                            hintStyle: TextStyle(
-                              color: Colors.white,
+                       Expanded(
+                        child: Container(
+                          margin: EdgeInsets.all(8),
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(40),color: Colors.green),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                            child: TextField(style: TextStyle(color: Colors.white),
+                              controller: messagetextSendingController,
+                              decoration: InputDecoration(
+                                hintText: "Type Message",
+                                hintStyle: TextStyle(
+                                  color: Colors.white,
+                                ),
+                                border: InputBorder.none,
+                              ),
                             ),
-                            border: InputBorder.none,
                           ),
                         ),
                       ),
-                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
                       child: GestureDetector(
@@ -107,16 +102,24 @@ class _ConversationState extends State<Conversation> {
                           SendMessages();
                         },
                         child: Container(
-                          width: 35,
-                          height: 35,
+                          width: 45,
+                          height: 45,
                           decoration: BoxDecoration(
+                            boxShadow: [
+                                        BoxShadow(
+                                                color: Colors.grey.withOpacity(0.8),
+                                                spreadRadius: 3,
+                                                blurRadius: 5,
+                                                offset: Offset(0, 3),
+                                              ),
+                            ],
                             gradient: LinearGradient(
                                 colors: [
                                   const Color(0xfffff7ff),
                                   const Color(0xffffffff)
                                 ]
                             ),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(40),
                           ),
                           child: Icon(Icons.send),
                         ),
@@ -144,13 +147,22 @@ class MessageHead extends StatelessWidget {
       alignment: isSendbyMe ? Alignment.centerRight:Alignment.centerLeft ,
       padding: EdgeInsets.only(left:isSendbyMe ? 0:10,right: isSendbyMe ? 10:0),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12,horizontal: 16),
+        padding: EdgeInsets.symmetric(vertical: 8,horizontal: 16),
         decoration: BoxDecoration(gradient: LinearGradient(colors: isSendbyMe ?
-                [ const Color(0xff5522ff), const Color(0xff5555ff)
-                ]: [ const Color(0xff5533ff), const Color(0xff5522ff)]),
+                [ const Color(0xffffffff), const Color(0xfff3ffff)]:
+                [ const Color(0xffffffff), const Color(0xfff3ffff)] 
+                ),
                 borderRadius : isSendbyMe ? BorderRadius.only(topLeft: Radius.circular(23), topRight: Radius.circular(23),bottomLeft: Radius.circular(23)) :BorderRadius.only(topLeft: Radius.circular(23),topRight: Radius.circular(23), bottomRight: Radius.circular(23))
-    ),
-        child: Text(Message , style: TextStyle(color: Colors.white),),
+    ,boxShadow:  [
+                      BoxShadow(
+                              color: Colors.grey.withOpacity(0.8),
+                              spreadRadius: 1,
+                              blurRadius: 2,
+                              offset: Offset(0, 3),
+                              ),
+                            ],
+                ),
+        child: Text(Message , style: blackTextstyle(),),
       ),
     );
   }
