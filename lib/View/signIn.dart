@@ -91,29 +91,9 @@ class _SignInState extends State<SignIn> {
                           children: [
                             Container(
                                 child: Container(
-                                  height: 40,
+                                  height: 67,
                                   child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 1),
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    image: DecorationImage(
-                                    image:AssetImage("asset/images/email.png"),
-                                    alignment:Alignment.centerLeft,
-                                    ), 
-                                    borderRadius: BorderRadius.circular(50),
-                                     boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 3,
-                                          blurRadius: 5,
-                                          offset: Offset(0, 3),
-                                         ),
-                                     ],
-                                  ),
-
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 70),
+                                    padding: EdgeInsets.symmetric(horizontal: 10),
                                     child: TextFormField(  
                                       validator: (val){
                                         RegExp regExp = new RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+", caseSensitive: false, multiLine: false,);
@@ -121,56 +101,52 @@ class _SignInState extends State<SignIn> {
                                       },
                                       controller: EmailEditingController,
                                       style: blackTextstyle(),
-                                      decoration: InputDecorationTextField("Email"),
+                                       decoration: InputDecoration(
+                                      labelText: "Email",
+                                      prefixIcon: Icon(Icons.email),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(30)
+                                      ),
+                                      helperText: "example@gmail.com"
+                                    ),
                                     ),
                                   ),
-                              ),
                                 ),
                             ),
-                            SizedBox(height: 15,),
-                            Container(
-                                  height: 40,
+                            SizedBox(height: 10,),
+                              Container(
+                                child: Container(
+                                  height: 67,
                                   child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 1),
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  image: DecorationImage(
-                                  image:AssetImage("asset/images/lock.png"),
-                                  alignment: Alignment.centerLeft,
-                                  ), 
-                                  borderRadius: BorderRadius.circular(50),
-                                   boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 3,
-                                        blurRadius: 5,
-                                        offset: Offset(0, 3),
-                                       ),
-                                   ],
-                                ),
-                                  child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 70),
-                                  child: TextFormField(
-                                    validator: (val){
-                                      return val.isEmpty|| val.length<8 ? "Invalid Password": null;
-                                    },
-                                    controller: PasswordEditingController,
-                                    style: blackTextstyle(),
-                                    decoration: InputDecorationTextField("Password"),
+                                    padding: EdgeInsets.symmetric(horizontal: 10),
+                                    child: TextFormField(  
+                                      validator: (val){
+                                          return val.isEmpty|| val.length<8 ? "Invalid Password": null;
+                                      },
+                                      controller: PasswordEditingController,
+                                      style: blackTextstyle(),
+                                       decoration: InputDecoration(
+                                      labelText: "Password",
+                                      prefixIcon: Icon(Icons.lock),
+                                      
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(30)
+                                      ),
+                                      helperText: ""
+                                    ),
                                     obscureText: true,
+                                    ),
                                   ),
                                 ),
-                              ),
                             ),
+                            
                           ],
                         ),
                       ),
-                     SizedBox(height: 4,),
                       Container(
                         alignment: Alignment.centerRight,
                           child:Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                            padding: EdgeInsets.symmetric(horizontal: 16,vertical: 0),
                             child: Text("Forgot Password?",style: blackTextstyle(),),
                           )
                       ),

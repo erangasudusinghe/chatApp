@@ -1,9 +1,13 @@
 import 'package:chat/View/ProfileScreen.dart';
+import 'package:chat/View/chatRoom.dart';
 import 'package:chat/Widgets/Widget.dart';
 import 'package:chat/services/Cons.dart';
+import 'package:chat/services/Tservice.dart';
 import 'package:chat/services/database.dart';
+import 'package:chatbar/chatbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:translator/translator.dart';
 
 import 'SearchScreen.dart';
 class Conversation extends StatefulWidget {
@@ -14,22 +18,36 @@ class Conversation extends StatefulWidget {
 }
 class _ConversationState extends State<Conversation> {
   TextEditingController messagetextSendingController = new  TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   Database db =new Database();
   Stream messagesStrem;
-  Widget MessageList(){
+  bool _needsScroll = false;
+  
+Widget MessageList(){
       return StreamBuilder(
         stream: messagesStrem,
         builder: (context,snapshot){
           if(snapshot.data == null) return Container(
               alignment: Alignment.center,
-              child:CircularProgressIndicator());
-
+              child:CircularProgressIndicator(),    
+              );
           return ListView.builder( itemCount: snapshot.data.documents.length,
-              itemBuilder: (context,index){
-              return MessageHead(snapshot.data.documents[index].data["message"],snapshot.data.documents[index].data["sendBy"]== Constants.Name);
-          });
+                padding: const EdgeInsets.only(bottom: 62),
+                controller: _scrollController,
+                itemBuilder: (context,index){
+                return MessageHead(snapshot.data.documents[index].data["message"],snapshot.data.documents[index].data["sendBy"]== Constants.Name);
+            });
         },
       );
+  }
+  
+  AutoScroll(){
+      setState(() {
+          _scrollController.animateTo(
+             _scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,);
+        });
   }
   SendMessages(){
     if(messagetextSendingController.text.isNotEmpty){
@@ -40,6 +58,13 @@ class _ConversationState extends State<Conversation> {
       };
       db.setChatRoomMessages(widget.chatroomId,ChatMap);
       messagetextSendingController.text="";
+      setState(() {
+          SendMessages();
+          _scrollController.animateTo(
+             _scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,);
+        });
     }
   }
   @override
@@ -47,24 +72,81 @@ class _ConversationState extends State<Conversation> {
     db.getChatRoomMessages(widget.chatroomId).then((val){
       setState(() {
         messagesStrem=val;
-      });
+      });  
     });
     super.initState();
   }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: GestureDetector(
-        onTap: (){
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context)=>Profile(),
-          ));
-        },
-        child: Container(          
-        padding: const EdgeInsets.all(2.0), child: Text(widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",)))
-      ),
-    backgroundColor: Colors.green[800],
-    ),
+      appBar: ChatBar( 
+          height: 64,
+          profilePic: Image.asset(
+            "asset/images/Eranga.jpg",
+            height: 50,
+            width: 50,
+            fit: BoxFit.contain,
+          ),
+          username: widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",),
+          status: Text('online'),
+          color: Colors.green.shade400,
+          backbuttoncolor: Colors.white,
+          backbutton: IconButton(
+            icon: Icon(Icons.keyboard_arrow_left,size: 35,),
+            onPressed: () {
+                Navigator.push(context, MaterialPageRoute(
+                builder: (context)=>ChatRoom(),
+              ));
+            },
+            color: Colors.white,
+          ),
+          
+          actions: <Widget>[
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.phone),
+              color: Colors.white,
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.videocam),
+              color: Colors.white,
+            ),
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_vert,
+                color: Colors.white,
+              ),
+              enabled: true,
+              onSelected: (str) {
+                  if(str=="Profile"){
+                  Navigator.push(context, MaterialPageRoute(
+                  builder: (context)=>Profile(),
+                  ));
+                  }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                const PopupMenuItem<String>(
+                  value: 'Profile',
+                  child: Text('Profile'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Media',
+                  child: Text('Media'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Search',
+                  child: Text('Search'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Wallpaper',
+                  child: Text('Wallpaper'),
+                ),
+              ],
+            )
+          ],
+        ),
       body: Container(
         color: Colors.white,
         child: Stack(
@@ -113,6 +195,7 @@ class _ConversationState extends State<Conversation> {
                                                 offset: Offset(0, 3),
                                               ),
                             ],
+                            
                             gradient: LinearGradient(
                                 colors: [
                                   const Color(0xfffff7ff),
@@ -135,7 +218,10 @@ class _ConversationState extends State<Conversation> {
     );
   }
 }
+
+
 class MessageHead extends StatelessWidget {
+  Tservice tservice= new Tservice();
   final String Message;
   final bool isSendbyMe;
   MessageHead(this.Message,this.isSendbyMe);
@@ -162,7 +248,12 @@ class MessageHead extends StatelessWidget {
                               ),
                             ],
                 ),
-        child: Text(Message , style: blackTextstyle(),),
+        child: GestureDetector(
+          onTap: (){
+            tservice.translate(context,Message.toString());
+          },
+          child: Text(Message , style: blackTextstyle(),),
+        ),
       ),
     );
   }

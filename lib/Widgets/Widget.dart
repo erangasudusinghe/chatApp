@@ -1,5 +1,7 @@
+import 'package:chat/View/chatRoom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:chatbar/chatbar.dart';
 Widget AppbarMain(BuildContext context){
   return AppBar(
       title: Image.asset("asset/images/logo.png", height: 50,),
