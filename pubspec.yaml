@@ -32,10 +32,16 @@ dependencies:
   firebase_auth: ^0.15.5+2
   cloud_firestore: ^0.13.5
   shared_preferences: ^0.5.12
-  image_picker: ^0.6.7+11
   permission_handler: ^5.0.1+1
   chatbar: ^1.0.1
   translator: ^0.1.5
+  firebase_storage: ^3.1.5
+  image_picker: ^0.6.7+14
+  image_downloader: ^0.20.1
+  data_connection_checker: ^0.3.4
+  progress_dialog: ^1.2.0
+ 
+
 
 dev_dependencies:
   flutter_test:

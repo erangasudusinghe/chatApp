@@ -1,15 +1,15 @@
-import 'package:chat/View/ProfileScreen.dart';
+import 'package:chat/View/chatterProfile.dart';
 import 'package:chat/View/chatRoom.dart';
 import 'package:chat/Widgets/Widget.dart';
 import 'package:chat/services/Cons.dart';
 import 'package:chat/services/Tservice.dart';
 import 'package:chat/services/database.dart';
 import 'package:chatbar/chatbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:translator/translator.dart';
 
-import 'SearchScreen.dart';
+
 class Conversation extends StatefulWidget {
   final String chatroomId;
   Conversation(this.chatroomId);
@@ -22,6 +22,45 @@ class _ConversationState extends State<Conversation> {
   Database db =new Database();
   Stream messagesStrem;
   bool _needsScroll = false;
+  String url;
+  
+ getImageUrl(String location)async{
+    return await Firestore.instance.collection("storage").where("location",isEqualTo: location).getDocuments();
+  }
+  setImage()async{
+          QuerySnapshot snapshot= await getImageUrl('User/Profile/pro${widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",)}.jpg');
+          setState(() {
+             url= snapshot.documents[0].data["url"].toString();
+          });
+  }
+
+
+userInstructor(BuildContext context){
+  return showDialog(context: context,builder: (context){
+                return AlertDialog(
+              contentPadding: EdgeInsets.only(left: 25, right: 25),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              content: Container(
+                height: 200,
+                width: 300,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text('1. You can send messages by typing blelow textbox and press the button to send.'),
+                      SizedBox(height: 5,),
+                      Text('2. You can translate masseges touch on message and hold on it.'),
+                    ],
+                  ),
+                ),
+              ),
+              );
+            });
+}
   
 Widget MessageList(){
       return StreamBuilder(
@@ -72,8 +111,10 @@ Widget MessageList(){
     db.getChatRoomMessages(widget.chatroomId).then((val){
       setState(() {
         messagesStrem=val;
-      });  
+      });
     });
+    setImage();
+    Constants.Chatter=widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",);
     super.initState();
   }
   
@@ -82,14 +123,9 @@ Widget MessageList(){
     return Scaffold(
       appBar: ChatBar( 
           height: 64,
-          profilePic: Image.asset(
-            "asset/images/Eranga.jpg",
-            height: 50,
-            width: 50,
-            fit: BoxFit.contain,
-          ),
+          profilePic: (url==null )?Image.asset('asset/images/user.png',height: 50,width: 50,fit: BoxFit.cover,):Image.network(url,height: 50,width: 50,fit: BoxFit.cover,),
           username: widget.chatroomId.toString().replaceAll("_","").replaceAll(Constants.Name, "",),
-          status: Text('online'),
+          status: Text(''),
           color: Colors.green.shade400,
           backbuttoncolor: Colors.white,
           backbutton: IconButton(
@@ -104,13 +140,10 @@ Widget MessageList(){
           
           actions: <Widget>[
             IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.phone),
-              color: Colors.white,
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.videocam),
+              onPressed: () {
+                userInstructor(context);
+              },
+              icon: Icon(Icons.info),
               color: Colors.white,
             ),
             PopupMenuButton<String>(
@@ -122,7 +155,7 @@ Widget MessageList(){
               onSelected: (str) {
                   if(str=="Profile"){
                   Navigator.push(context, MaterialPageRoute(
-                  builder: (context)=>Profile(),
+                  builder: (context)=>ChatterProfile(),
                   ));
                   }
               },
@@ -130,18 +163,6 @@ Widget MessageList(){
                 const PopupMenuItem<String>(
                   value: 'Profile',
                   child: Text('Profile'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Media',
-                  child: Text('Media'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Search',
-                  child: Text('Search'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Wallpaper',
-                  child: Text('Wallpaper'),
                 ),
               ],
             )
@@ -249,7 +270,7 @@ class MessageHead extends StatelessWidget {
                             ],
                 ),
         child: GestureDetector(
-          onTap: (){
+          onLongPress: (){
             tservice.translate(context,Message.toString());
           },
           child: Text(Message , style: blackTextstyle(),),

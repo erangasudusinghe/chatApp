@@ -1,6 +1,5 @@
+import 'package:chat/services/Supportivefunction.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 
 class Database{
   getUserByUserName(String UserName)async{
@@ -9,12 +8,23 @@ class Database{
   getUserByUserEmail(String Email)async{
     return await Firestore.instance.collection("users").where("email",isEqualTo: Email).getDocuments();
   }
+  getUserProfile(String email)async{
+    return await Firestore.instance.collection("UserDetails").where("Email",isEqualTo: email).getDocuments();
+  }
   UploadUserInfo(useMap)
   {
     Firestore.instance.collection("users").add(useMap).catchError((e){
       print(e.toString());
     });
   }
+  uploadProfileInfo(useMap)async
+  {
+    String userEmail=await HelperFunctons.getUserEmail();
+    Firestore.instance.collection("UserDetails").document(userEmail).setData(useMap).catchError((e){
+      print(e.toString());
+    });
+  }
+  
   CreateChatRoomData(String chatRoomId,ChatRoomMap){
     Firestore.instance.collection("ChatRoom").document(chatRoomId).setData(ChatRoomMap).catchError((e) {
       print(e.toString());
@@ -29,4 +39,6 @@ class Database{
   getUserChatRoom(String name)async{
     return await Firestore.instance.collection("ChatRoom").where("users",arrayContains: name).snapshots();
   }
+  
+
 }

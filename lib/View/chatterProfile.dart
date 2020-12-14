@@ -1,19 +1,16 @@
-import 'dart:io';
 import 'package:chat/services/Cons.dart';
 import 'package:chat/services/ImageUploadservice.dart';
-import 'package:chat/services/Supportivefunction.dart';
 import 'package:chat/services/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:image_picker/image_picker.dart';
 
-class ProfilePage extends StatefulWidget {
+class ChatterProfile extends StatefulWidget {
   @override
   MapScreenState createState() => MapScreenState();
 }
 
-class MapScreenState extends State<ProfilePage>with SingleTickerProviderStateMixin {
+class MapScreenState extends State<ChatterProfile>with SingleTickerProviderStateMixin {
   bool _status = true;
   TextEditingController nameEditingController=new TextEditingController();
   TextEditingController emailEditingController=new TextEditingController();
@@ -23,38 +20,45 @@ class MapScreenState extends State<ProfilePage>with SingleTickerProviderStateMix
   StorangeRepo storangeRepo =new StorangeRepo();
   String url;
   String mobile,name,email,descrip;
+  String userEmail;
   
+
+
  userinfo()async{
-    String userEmail=await HelperFunctons.getUserEmail();
-    setState(()async {
-      QuerySnapshot querySnapshot =await Database().getUserProfile(userEmail);
-      email=querySnapshot.documents[0].data["Email"].toString();
-      name=querySnapshot.documents[0].data["Name"].toString();
-      mobile=querySnapshot.documents[0].data["Mobile"].toString();
-      descrip=querySnapshot.documents[0].data["Description"].toString();
-      nameEditingController.text=name;
-      emailEditingController.text=email;
-      numberEditingController.text=mobile;
-      decripEditionController.text=descrip;
-    });
+      setState(()async {
+          QuerySnapshot querySnapshot = await Database().getUserProfile(userEmail);
+          email=querySnapshot.documents[0].data["Email"].toString();
+          name=querySnapshot.documents[0].data["Name"].toString();
+          mobile=querySnapshot.documents[0].data["Mobile"].toString();
+          descrip=querySnapshot.documents[0].data["Description"].toString();
+          nameEditingController.text=name;
+          emailEditingController.text=email;
+          numberEditingController.text=mobile;
+          decripEditionController.text=descrip;
+      });
+   
+ }
  
 
- }
-   getImageUrl(String location)async{
+  getImageUrl(String location)async{
     return await Firestore.instance.collection("storage").where("location",isEqualTo: location).getDocuments();
   }
   setImage()async{
-          QuerySnapshot snapshot= await getImageUrl('User/Profile/pro${Constants.Name}.jpg');
+          QuerySnapshot snapshot= await getImageUrl('User/Profile/pro${Constants.Chatter}.jpg');
           setState(() {
              url= snapshot.documents[0].data["url"].toString();
           });
   }
 
-  
+  void emailgetter()async{
+    QuerySnapshot snapshot = await Database().getUserByUserName(Constants.Chatter);
+    userEmail =snapshot.documents[0].data["email"].toString();
+    userinfo();
+  }
   @override
   void initState(){
+    emailgetter();
     setImage();
-    userinfo();
     super.initState();
   }
   
@@ -110,29 +114,6 @@ class MapScreenState extends State<ProfilePage>with SingleTickerProviderStateMix
                             buildProfile(context,url),
                           ],
                         ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 90.0, right: 100.0),
-                            child: new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                new CircleAvatar(
-                                  backgroundColor: Colors.green,
-                                  radius: 25.0,
-                                  child: GestureDetector(
-                                    onTap: ()async{
-                                         // ignore: deprecated_member_use
-                                        File image =await ImagePicker.pickImage(source: ImageSource.gallery);
-                                        storangeRepo.uploadFile(image);
-                                        storangeRepo.getUserEmail();
-                                    },
-                                    child: new Icon(
-                                      Icons.camera_alt,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            )),
                       ]),
                     )
                   ],
@@ -165,13 +146,6 @@ class MapScreenState extends State<ProfilePage>with SingleTickerProviderStateMix
                                   ),
                                 ],
                               ),
-                              new Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  _status ? _getEditIcon() : new Container(),
-                                ],
-                              )
                             ],
                           )),
                       Padding(
@@ -403,24 +377,4 @@ class MapScreenState extends State<ProfilePage>with SingleTickerProviderStateMix
       ),
     );
   }
-
-  Widget _getEditIcon() {
-    return new GestureDetector(
-      child: new CircleAvatar(
-        backgroundColor: Colors.green,
-        radius: 14.0,
-        child: new Icon(
-          Icons.edit,
-          color: Colors.white,
-          size: 16.0,
-        ),
-      ),
-      onTap: () {
-        setState(() {
-          _status = false;
-        });
-      },
-    );
-  }
 }
-

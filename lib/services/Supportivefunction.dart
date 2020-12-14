@@ -19,14 +19,17 @@ class HelperFunctons{
 
   static Future<bool>getUserlogin()async{
     SharedPreferences preferences =await SharedPreferences.getInstance();
+    // ignore: await_only_futures
     return await preferences.getBool(SharedPeferenceUserLogingKey);
   }
   static Future<String>getUserName()async{
     SharedPreferences preferences =await SharedPreferences.getInstance();
+    // ignore: await_only_futures
     return await preferences.getString(SharedPeferenceUserNameKey);
   }
   static Future<String>getUserEmail()async{
     SharedPreferences preferences =await SharedPreferences.getInstance();
+    // ignore: await_only_futures
     return await preferences.getString(SharedPeferenceUserMailKey);
   }
 

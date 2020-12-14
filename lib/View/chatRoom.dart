@@ -1,15 +1,17 @@
+
 import 'package:chat/View/SearchScreen.dart';
 import 'package:chat/View/conversation.dart';
-import 'package:chat/View/signIn.dart';
-import 'package:chat/Widgets/Widget.dart';
 import 'package:chat/services/Cons.dart';
+import 'package:chat/View/ProfileScreen.dart';
 import 'package:chat/services/Supportivefunction.dart';
 import 'package:chat/services/athontication.dart';
 import 'package:chat/services/database.dart';
 import 'package:chat/services/helper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chatbar/chatbar.dart';
+import 'package:chat/services/ImageUploadservice.dart';
 
 class ChatRoom extends StatefulWidget {
   @override
@@ -18,8 +20,23 @@ class ChatRoom extends StatefulWidget {
 
 class _ChatRoomState extends State<ChatRoom> {
   Database database =new Database();
+  StorangeRepo storangeRepo = new StorangeRepo();
   AuthonticationMethod _authonticationMethod=new AuthonticationMethod();
   Stream Chatstream;
+  String chatroomID;
+
+ 
+  String url;
+  getImageUrl(String location)async{
+    return await Firestore.instance.collection("storage").where("location",isEqualTo: location).getDocuments();
+  }
+  setImage()async{
+          QuerySnapshot snapshot= await getImageUrl('User/Profile/pro${Constants.Name}.jpg');
+          setState(() {
+             url= snapshot.documents[0].data["url"].toString();
+          });
+  }
+
   Widget ChatRoomList()
   {
     return StreamBuilder(
@@ -28,9 +45,10 @@ class _ChatRoomState extends State<ChatRoom> {
         return snapshot.hasData ?ListView.builder(
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context,index){
+              chatroomID= snapshot.data.documents[index].data["ChatRoomID"].toString();
               return ChatRoomTile(
                 snapshot.data.documents[index].data["ChatRoomID"].toString().replaceAll("_","").replaceAll(Constants.Name, ""),
-                  snapshot.data.documents[index].data["ChatRoomID"]
+                snapshot.data.documents[index].data["ChatRoomID"]
               );
             }):Container();
       },
@@ -38,9 +56,12 @@ class _ChatRoomState extends State<ChatRoom> {
   }
   @override
   void initState() {
+    setImage(); 
     getUserInfo();
     super.initState();
   }
+  
+   
   getUserInfo()async{
       Constants.Name=await HelperFunctons.getUserName();
       database.getUserChatRoom(Constants.Name).then((value){
@@ -49,6 +70,7 @@ class _ChatRoomState extends State<ChatRoom> {
         });
       });
   }
+ 
   @override
   Widget build(BuildContext context) {
     return Stack( // <-- STACK AS THE SCAFFOLD PARENT
@@ -65,12 +87,7 @@ class _ChatRoomState extends State<ChatRoom> {
       backgroundColor: Colors.white,
       appBar:new ChatBar( 
           height: 64,
-          profilePic: Image.asset(
-            "asset/images/Eranga.jpg",
-            height: 50,
-            width: 50,
-            fit: BoxFit.contain,
-          ),
+          profilePic:(url==null)?Image.asset('asset/images/user.png',height: 50,width: 50,fit: BoxFit.cover,):Image.network(url,fit: BoxFit.cover,height: 50,width: 50,),
           username: Constants.Name,
           status: Text(''),
           color: Colors.green.shade400,
@@ -82,43 +99,34 @@ class _ChatRoomState extends State<ChatRoom> {
                 color: Colors.white,
               ),
               enabled: true,
-              onSelected: (str) {},
+              onSelected: (str) {
+                 if(str=="Profile"){
+                  Navigator.push(context, MaterialPageRoute(
+                  builder: (context)=>ProfilePage(),
+                  ));
+
+                  }
+                else if(str=="logout"){
+                  _authonticationMethod.SignOut();
+                  Navigator.pushReplacement(context, MaterialPageRoute(
+                  builder: (context)=>AuthHelp(),
+                  ));
+                }
+              },
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 const PopupMenuItem<String>(
-                  value: 'View Contact',
+                  value: 'Profile',
                   child: Text('My Profile'),
                 ),
                 const PopupMenuItem<String>(
-                  value: 'Media',
+                  value: 'logout',
                   child: Text('Log Out'),
                 ),
               ],
             )
           ],
         ),
-      /*AppBar(
-        title: Image.asset("asset/images/logo.png", height: 50,),
-        backgroundColor: Colors.green,
-        actions: [
-          GestureDetector(
-            onTap: (){
-              _authonticationMethod.SignOut();
-              Navigator.pushReplacement(context, MaterialPageRoute(
-                builder: (context)=>AuthHelp(),
-              ));
-            },
-            child: Container(
-              padding: EdgeInsets.all(20.0),
-              margin: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage ("asset/images/logout.png"), 
-                  )
-                ), 
-              ),
-          ),
-        ],
-      ),*/
+        
       body: ChatRoomList(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.search),
@@ -133,6 +141,7 @@ class _ChatRoomState extends State<ChatRoom> {
     )]);
   }
 }
+
 class ChatRoomTile extends StatelessWidget {
   final String name;
   final String chatRoom;
@@ -190,8 +199,8 @@ class ChatRoomTile extends StatelessWidget {
                   child: Column(
                     children:[
                       Container(
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
                         alignment: Alignment.topLeft,
-                        margin: EdgeInsets.fromLTRB(0, 0, 0, 23),
                         child: Text(name,style: TextStyle(fontSize: 18,color: Colors.black54),)
                         ),
                       Divider(color: Colors.black54,),

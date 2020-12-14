@@ -1,11 +1,13 @@
+import 'package:chat/View/FrogetPasswordPage.dart';
 import 'package:chat/Widgets/Widget.dart';
+import 'package:chat/services/Cons.dart';
+import 'package:chat/services/InternetConnection.dart';
 import 'package:chat/services/Supportivefunction.dart';
 import 'package:chat/services/athontication.dart';
 import 'package:chat/services/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'chatRoom.dart';
 
 
@@ -24,7 +26,9 @@ class _SignInState extends State<SignIn> {
   Database database = new Database();
   bool isLoading= false;
   QuerySnapshot snapshot;
+
   signIn(){
+  if(Constants.isconnected){
     if(formkey.currentState.validate()){
       HelperFunctons.SaveUserEmail(EmailEditingController.text);
       setState(() {
@@ -44,8 +48,42 @@ class _SignInState extends State<SignIn> {
           ));
         }
       });
-
     }
+    }
+    else{
+      connectionError(context);
+    }
+  }
+ connectionError(BuildContext context){
+       return showDialog(context: context,builder: (context){
+          return AlertDialog(
+              contentPadding: EdgeInsets.only(left: 25, right: 25),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              content: Container(
+                height: 100,
+                width: 300,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text('Disconnected from internet connection, Please check the connection'),
+                    ],
+                  ),
+                ),
+              ),
+              );
+            });
+          
+             
+    }
+  @override
+  void initState() {
+    InternetConnection().checkConnection(context);
+    super.initState();
   }
   @override
   Widget build(BuildContext context) {
@@ -91,7 +129,6 @@ class _SignInState extends State<SignIn> {
                           children: [
                             Container(
                                 child: Container(
-                                  height: 67,
                                   child: Container(
                                     padding: EdgeInsets.symmetric(horizontal: 10),
                                     child: TextFormField(  
@@ -104,6 +141,8 @@ class _SignInState extends State<SignIn> {
                                        decoration: InputDecoration(
                                       labelText: "Email",
                                       prefixIcon: Icon(Icons.email),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(2),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(30)
                                       ),
@@ -116,7 +155,6 @@ class _SignInState extends State<SignIn> {
                             SizedBox(height: 10,),
                               Container(
                                 child: Container(
-                                  height: 67,
                                   child: Container(
                                     padding: EdgeInsets.symmetric(horizontal: 10),
                                     child: TextFormField(  
@@ -128,7 +166,8 @@ class _SignInState extends State<SignIn> {
                                        decoration: InputDecoration(
                                       labelText: "Password",
                                       prefixIcon: Icon(Icons.lock),
-                                      
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(2),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(30)
                                       ),
@@ -144,13 +183,28 @@ class _SignInState extends State<SignIn> {
                         ),
                       ),
                       Container(
-                        alignment: Alignment.centerRight,
-                          child:Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16,vertical: 0),
-                            child: Text("Forgot Password?",style: blackTextstyle(),),
+                          child:Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 16,vertical: 0),
+                                child: Text("Forgot Password?",style: blackTextstyle(),),
+                                 ),
+                              GestureDetector(
+                                 onTap: (){
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => PasswordReset(),
+                                    ));
+                                  },
+                                child: Container(
+                                  padding: EdgeInsets.fromLTRB(8,2,8,2),
+                                  child: Text('Click'),
+                                  decoration: BoxDecoration(color:Colors.green,borderRadius: BorderRadius.circular(50), ),
+                                ),
+                              ),
+                            ],
                           )
                       ),
-                      SizedBox(height: 4,),
+                      SizedBox(height: 16,),
                       GestureDetector(
                         onTap: (){
                           signIn();

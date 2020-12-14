@@ -3,6 +3,7 @@ import 'package:chat/Widgets/Widget.dart';
 import 'package:chat/services/Supportivefunction.dart';
 import 'package:chat/services/athontication.dart';
 import 'package:chat/services/database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 class SignUp extends StatefulWidget {
@@ -21,6 +22,8 @@ class _SignUpState extends State<SignUp> {
   String confirmVal;
   final formKey = GlobalKey<FormState>();
   bool loading =false;
+  static String dbUser;
+  static String dbEmail;
 
  ToSignup(){
    if(formKey.currentState.validate())
@@ -31,17 +34,73 @@ class _SignUpState extends State<SignUp> {
       };
       HelperFunctons.SaveUserEmail(EmailEditingController.text);
       HelperFunctons.SaveUserName(UserNametextEditingController.text);
+      comparisor();
       setState(() {
         loading=true;
       });
       authonticationMethod.SignUpWithEmailAndPassword(EmailEditingController.text, PasswordEditingController.text).then((val){
-        database.UploadUserInfo(userMap);
-        HelperFunctons.SaveUserLogin(true);
-        Navigator.pushReplacement(context, MaterialPageRoute(builder:(context) => ChatRoom(),
+        if(check()){
+            database.UploadUserInfo(userMap);
+            HelperFunctons.SaveUserLogin(true);
+            Navigator.pushReplacement(context, MaterialPageRoute(builder:(context) => ChatRoom(),
         ));
+        }
+       else{
+            setState(() {
+            loading=false;
+          });
+         print('Erro with Email and Use name');
+         loginErro(context);
+         }
       });
    }
  }
+
+ bool check(){
+   if(dbUser==null && dbEmail==null){
+     return true;
+   }
+   else{
+    return false;
+   }
+ }
+ void comparisor(){
+      
+      database.getUserByUserName(UserNametextEditingController.text).then((val)async{
+        QuerySnapshot user=await val;
+        dbUser=user.documents[0].data["UserName"].toString();
+        print( user.documents[0].data["UserName"].toString());
+      });
+      database.getUserByUserEmail(EmailEditingController.text).then((val)async{
+        QuerySnapshot email= await val; 
+        dbEmail = email.documents[0].data["email"].toString();
+        print( email.documents[0].data["email"].toString());
+      });
+ }
+loginErro(BuildContext context){
+        return showDialog(context: context,builder: (context){
+          return AlertDialog(
+              contentPadding: EdgeInsets.only(left: 25, right: 25),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              content: Container(
+                height: 200,
+                width: 300,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text('That you entred email or password alrady using please check the Email or enter another Email to contuniue Sign up process'),
+                    ],
+                  ),
+                ),
+              ),
+              );
+            });
+     }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,6 +152,7 @@ class _SignUpState extends State<SignUp> {
                             ),
                           ),
                         ),
+                      SizedBox(height: 2,),
                       Container(
                         height: 67,
                           child: Container(
@@ -102,6 +162,8 @@ class _SignUpState extends State<SignUp> {
                               decoration: InputDecoration(
                                       labelText: "Email",
                                       prefixIcon: Icon(Icons.email),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(2),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(30)
                                       ),
@@ -115,6 +177,7 @@ class _SignUpState extends State<SignUp> {
                             ),
                           ),
                         ),
+                        SizedBox(height: 2,),
                       Container(
                         height: 67,
                           child: Container(
@@ -132,12 +195,13 @@ class _SignUpState extends State<SignUp> {
                               controller: PasswordEditingController,
                               validator: (val){
                                 confirmVal=val;
-                                return val.isEmpty|| val.length<9 ? "Invalid Password": null;
+                                return val.isEmpty|| val.length<8 ? "Invalid Password": null;
                               },
                               obscureText: true,
                             ),
                           ),
                         ),
+                        SizedBox(height: 2,),
                       Container(
                         height: 67,
                           child: Container(
@@ -153,7 +217,7 @@ class _SignUpState extends State<SignUp> {
                                       helperText: ""
                                     ),
                               validator: (val){
-                                return val==confirmVal|| val.length<9 ? "Password not matching with that you entered": null;
+                                return (val==confirmVal|| val.length<8) ? null:"Password not matching with that you entered";
                               },
                               obscureText: true,
                             ),
@@ -192,32 +256,6 @@ class _SignUpState extends State<SignUp> {
                     ),
                     child: Text("Create",style: simpleTextstyle(),),
                   ),
-                ),
-                SizedBox(height: 20,),
-                Container(
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    gradient:LinearGradient(
-                      colors:[
-                        const Color(0xffffffff),
-                        const Color(0xfffffff8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(50),
-                     boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 3,
-                                    blurRadius: 5,
-                                    offset: Offset(0, 3),
-                                   ),
-                               ],
-                  ),
-                  child: Text("Sign in With Google",style: TextStyle(
-                      color: Colors.black
-                  ),),
                 ),
                 SizedBox(height: 15,),
                 Row(

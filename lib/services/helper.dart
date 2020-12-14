@@ -17,6 +17,7 @@ class _AuthHelpState extends State<AuthHelp> {
       return SignUp(toggleView);
     }
   }
+
   void toggleView()
   {
     setState(() {
